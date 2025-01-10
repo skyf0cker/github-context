@@ -14,11 +14,8 @@ A CLI tool to fetch and analyze GitHub repository content, optimized for providi
 ## Installation
 
 ```bash
-# Install globally
 bun install -g github-context
-
-# Or run directly with bun
-bun install
+npm install -g github-context
 ```
 
 ## Usage
@@ -27,13 +24,16 @@ bun install
 
 ```bash
 # Fetch repository content
-github-context fetch https://github.com/username/repo
+bunx github-context fetch https://github.com/oxalica/async-lsp
+npx github-context fetch https://github.com/oxalica/async-lsp
 
 # Use custom config file
-github-context fetch https://github.com/username/repo -c ./my-config.yaml
+bunx github-context fetch https://github.com/oxalica/async-lsp -c ./my-config.yaml
+npx github-context fetch https://github.com/oxalica/async-lsp -c ./my-config.yaml
 
 # Specify custom output file
-github-context fetch https://github.com/username/repo -o output.md
+bunx github-context fetch https://github.com/oxalica/async-lsp -o output.md
+npx github-context fetch https://github.com/oxalica/async-lsp -o output.md
 ```
 
 ### Initialize Configuration
@@ -41,7 +41,8 @@ github-context fetch https://github.com/username/repo -o output.md
 Create a default configuration file in your current directory:
 
 ```bash
-github-context init-config
+bunx github-context init-config
+npx github-context init-config
 ```
 
 ## Configuration
