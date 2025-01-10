@@ -1,0 +1,52 @@
+# Repository content fetching configuration
+
+# File patterns to include in the search
+include_patterns:
+  readme:
+    - "README.md"
+    - "README.txt"
+
+  documentation:
+    - "docs/**/*.md"
+    - "documentation/**/*"
+    - "**/*.md"
+    - "guide/**/*"
+    - "tutorials/**/*"
+
+  examples:
+    - "examples/**/*"
+    - "sample/**/*"
+    - "demo/**/*"
+
+  tests:
+    - "test/**/*"
+    - "tests/**/*"
+    - "__tests__/**/*"
+    - "spec/**/*"
+
+# Patterns to exclude
+exclude_patterns:
+  - "node_modules/**/*"
+  - "dist/**/*"
+  - "build/**/*"
+  - ".git/**/*"
+  - "*.log"
+  - "*.lock"
+
+# File size limits (in KB)
+max_file_size: 500
+
+# Maximum number of files to fetch per category
+max_files_per_category: 50
+
+# Output configuration
+output:
+  format: "markdown"
+  file_name: "repo_content.md"
+  include_line_numbers: true
+  group_by_category: true
+
+# GitHub API configuration
+github:
+  use_auth: false
+  # token: "your-token-here"
