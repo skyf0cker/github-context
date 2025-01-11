@@ -1,30 +1,34 @@
 import type { Config, GitHubContent, RepoContent } from "../types";
 import { isExcluded, matchesPatterns } from "../utils/patterns";
 import { formatFileContent } from "../utils/formatters";
-import ora, { type Ora } from "ora";
+import ora, { type Ora, type Spinner } from "ora";
 import chalk from "chalk";
 
 export class GitHubFetcher {
   private baseApiUrl: string;
   private repoApiUrl: string;
   private config: Config;
-  private spinner: Ora;
+  private spinner: Ora | null = null;
   private processedFiles: {
     category: string;
     path: string;
   }[] = [];
+  private silent: boolean;
 
-  constructor(repoUrl: string, config: Config) {
+  constructor(
+    repoUrl: string,
+    config: Config,
+    silent: boolean,
+    spinner: Ora | null,
+  ) {
     this.validateRepoUrl(repoUrl);
     this.baseApiUrl = repoUrl
       .replace("github.com", "api.github.com/repos")
       .replace(/\/$/, "");
     this.repoApiUrl = `${this.baseApiUrl}/contents`;
     this.config = config;
-    this.spinner = ora({
-      text: "Initializing...",
-      spinner: "dots",
-    });
+    this.silent = silent;
+    this.spinner = spinner;
   }
 
   private validateRepoUrl(url: string) {
@@ -106,7 +110,7 @@ export class GitHubFetcher {
       tests: [],
     };
 
-    this.spinner.start("Analyzing repository structure...");
+    if (this.spinner) this.spinner.start("Analyzing repository structure...");
 
     const queue = [""];
     const processed = new Set<string>();
@@ -134,7 +138,7 @@ export class GitHubFetcher {
           const currentCount = categoryCount.get(category) || 0;
           if (currentCount >= this.config.max_files_per_category) continue;
 
-          this.spinner.text = `Processing: ${item.path}`;
+          if (this.spinner) this.spinner.text = `Processing: ${item.path}`;
 
           const fileContent = await this.fetchFileContent(item);
           if (fileContent === null) continue;
@@ -153,12 +157,16 @@ export class GitHubFetcher {
         }
       }
 
-      this.spinner.succeed("Repository content processed successfully!");
-      this.printProcessingSummary();
+      if (this.spinner)
+        this.spinner.succeed("Repository content processed successfully!");
+      if (!this.silent) {
+        this.printProcessingSummary();
+      }
 
       return content;
     } catch (error) {
-      this.spinner.fail("Failed to process repository content");
+      if (this.spinner)
+        this.spinner.fail("Failed to process repository content");
       throw error;
     }
   }

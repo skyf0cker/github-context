@@ -11,21 +11,27 @@ import Bun from "bun";
 interface FetchCommandOptions {
   config?: string;
   output?: string;
+  silent?: boolean;
 }
 
 export async function fetchCommand(
   repoUrl: string,
   options: FetchCommandOptions,
 ) {
-  console.log(chalk.bold("\nGitHub Context Analyzer\n"));
+  if (!options.silent) {
+    console.log(chalk.bold("\nGitHub Context Analyzer\n"));
+  }
 
-  const spinner = ora("Starting repository analysis...").start();
+  // Initialize spinner only if not in silent mode
+  const spinner = !options.silent
+    ? ora("Starting repository analysis...").start()
+    : null;
 
   try {
     // Load configuration
     const configPath =
       options.config || path.join(__dirname, "../config/defaultConfig.yaml");
-    spinner.text = "Loading configuration...";
+    if (spinner) spinner.text = "Loading configuration...";
     const config = await loadConfig(configPath);
 
     // Override output file name if specified in command
@@ -34,34 +40,43 @@ export async function fetchCommand(
     }
 
     // Initialize fetcher
-    spinner.text = "Initializing GitHub API client...";
-    const fetcher = new GitHubFetcher(repoUrl, config);
+    if (spinner) spinner.text = "Initializing GitHub API client...";
+    const fetcher = new GitHubFetcher(
+      repoUrl,
+      config,
+      !!options.silent,
+      spinner,
+    );
 
     // Fetch content
     const content = await fetcher.fetchRepoContent();
 
     // Format output
-    spinner.text = "Formatting content...";
+    if (spinner) spinner.text = "Formatting content...";
     const output = formatOutput(content, config);
 
     // Save to file
-    spinner.text = "Saving output...";
+    if (spinner) spinner.text = "Saving output...";
     await Bun.write(config.output.file_name, output);
 
-    spinner.stop();
+    if (spinner) spinner.stop();
 
     // Calculate tokens
     const tokens = encode(output);
 
     // Print final summary
-    console.log(chalk.bold("\nOutput Summary:"));
-    console.log(
-      chalk.green(`✓ Content saved to: ${chalk.bold(config.output.file_name)}`),
-    );
-    console.log(chalk.green(`✓ Total tokens: ${chalk.bold(tokens.length)}`));
-    console.log(); // Empty line at the end
+    if (!options.silent) {
+      console.log(chalk.bold("\nOutput Summary:"));
+      console.log(
+        chalk.green(
+          `✓ Content saved to: ${chalk.bold(config.output.file_name)}`,
+        ),
+      );
+      console.log(chalk.green(`✓ Total tokens: ${chalk.bold(tokens.length)}`));
+      console.log(); // Empty line at the end
+    }
   } catch (error) {
-    spinner.fail(chalk.red("Error during repository analysis"));
+    if (spinner) spinner.fail(chalk.red("Error during repository analysis"));
     if (error instanceof Error) {
       console.error(chalk.red("\nError details:"), error.message);
     }
@@ -86,6 +101,7 @@ export function initializeCLI(): Command {
       "-o, --output <filename>",
       "Output file name (overrides config file setting)",
     )
+    .option("-s, --silent", "silent fetch without any output")
     .action(fetchCommand);
 
   program
