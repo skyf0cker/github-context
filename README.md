@@ -9,6 +9,7 @@ A CLI tool to fetch and analyze GitHub repository content, optimized for providi
 - 📝 Customizable output formatting
 - 🔢 Token counting for LLM context optimization
 - ⚙️ Flexible configuration system
+- 🤫 Silent mode for streamlined operations
 - 🚀 Built with Bun for high performance
 
 ## Installation
@@ -34,6 +35,10 @@ npx github-context fetch https://github.com/oxalica/async-lsp -c ./my-config.yam
 # Specify custom output file
 bunx github-context fetch https://github.com/oxalica/async-lsp -o output.md
 npx github-context fetch https://github.com/oxalica/async-lsp -o output.md
+
+# Silent fetch without any output
+bunx github-context fetch https://github.com/oxalica/async-lsp -s
+npx github-context fetch https://github.com/oxalica/async-lsp -s
 ```
 
 ### Initialize Configuration
@@ -78,12 +83,13 @@ output:
 
 ## Command Line Options
 
-| Option | Description |
-|--------|-------------|
-| `-c, --config <path>` | Path to custom configuration file |
-| `-o, --output <filename>` | Output file name (overrides config setting) |
-| `-h, --help` | Display help information |
-| `-V, --version` | Display version number |
+| Option                      | Description                                      |
+|-----------------------------|--------------------------------------------------|
+| `-c, --config <path>`       | Path to custom configuration file                |
+| `-o, --output <filename>`   | Output file name (overrides config setting)      |
+| `-s, --silent`              | Silent fetch without any output                  |
+| `-h, --help`                | Display help information                         |
+| `-V, --version`             | Display version number                           |
 
 ## Output
 
@@ -127,16 +133,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-```
-
-This README provides a comprehensive overview of your project, including:
-- Project description and features
-- Installation instructions
-- Usage examples
-- Configuration details
-- Command line options
-- Development instructions
-- Dependencies
-- License and contribution guidelines
-
-You can customize it further based on your specific needs or add more sections as your project evolves.
