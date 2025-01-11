@@ -1,8 +1,8 @@
-import type { Config, GitHubContent, RepoContent } from "../types";
-import { isExcluded, matchesPatterns } from "../utils/patterns";
-import { formatFileContent } from "../utils/formatters";
-import ora, { type Ora, type Spinner } from "ora";
-import chalk from "chalk";
+import type { Config, GitHubContent, RepoContent } from '../types';
+import { isExcluded, matchesPatterns } from '../utils/patterns';
+import { formatFileContent } from '../utils/formatters';
+import ora, { type Ora, type Spinner } from 'ora';
+import chalk from 'chalk';
 
 export class GitHubFetcher {
   private baseApiUrl: string;
@@ -15,16 +15,9 @@ export class GitHubFetcher {
   }[] = [];
   private silent: boolean;
 
-  constructor(
-    repoUrl: string,
-    config: Config,
-    silent: boolean,
-    spinner: Ora | null,
-  ) {
+  constructor(repoUrl: string, config: Config, silent: boolean, spinner: Ora | null) {
     this.validateRepoUrl(repoUrl);
-    this.baseApiUrl = repoUrl
-      .replace("github.com", "api.github.com/repos")
-      .replace(/\/$/, "");
+    this.baseApiUrl = repoUrl.replace('github.com', 'api.github.com/repos').replace(/\/$/, '');
     this.repoApiUrl = `${this.baseApiUrl}/contents`;
     this.config = config;
     this.silent = silent;
@@ -34,19 +27,19 @@ export class GitHubFetcher {
   private validateRepoUrl(url: string) {
     const githubUrlPattern = /^https?:\/\/github\.com\/[\w-]+\/[\w-]+/;
     if (!githubUrlPattern.test(url)) {
-      throw new Error("Invalid GitHub repository URL format");
+      throw new Error('Invalid GitHub repository URL format');
     }
   }
 
   private getHeaders(): Headers {
     const headers = new Headers({
-      Accept: "application/vnd.github.v3+json",
+      Accept: 'application/vnd.github.v3+json',
     });
 
     if (this.config.github.use_auth) {
       const token = this.config.github.token || process.env.GITHUB_TOKEN;
       if (token) {
-        headers.set("Authorization", `token ${token}`);
+        headers.set('Authorization', `token ${token}`);
       }
     }
 
@@ -80,18 +73,13 @@ export class GitHubFetcher {
       const response = await fetch(item.download_url);
       return await response.text();
     } catch (error) {
-      console.error("Error fetching file content:", error);
+      console.error('Error fetching file content:', error);
       return null;
     }
   }
 
   private getCategoryForFile(path: string): keyof RepoContent | null {
-    const categories: (keyof RepoContent)[] = [
-      "readme",
-      "documentation",
-      "examples",
-      "tests",
-    ];
+    const categories: (keyof RepoContent)[] = ['readme', 'documentation', 'examples', 'tests'];
 
     for (const category of categories) {
       if (matchesPatterns(path, this.config.include_patterns[category])) {
@@ -110,9 +98,9 @@ export class GitHubFetcher {
       tests: [],
     };
 
-    if (this.spinner) this.spinner.start("Analyzing repository structure...");
+    if (this.spinner) this.spinner.start('Analyzing repository structure...');
 
-    const queue = [""];
+    const queue = [''];
     const processed = new Set<string>();
     const categoryCount = new Map<keyof RepoContent, number>();
 
@@ -127,7 +115,7 @@ export class GitHubFetcher {
         for (const item of items) {
           if (this.isExcluded(item.path)) continue;
 
-          if (item.type === "dir") {
+          if (item.type === 'dir') {
             queue.push(item.path);
             continue;
           }
@@ -143,10 +131,7 @@ export class GitHubFetcher {
           const fileContent = await this.fetchFileContent(item);
           if (fileContent === null) continue;
 
-          const formattedContent = this.formatFileContent(
-            item.path,
-            fileContent,
-          );
+          const formattedContent = this.formatFileContent(item.path, fileContent);
           content[category].push(formattedContent);
           categoryCount.set(category, currentCount + 1);
 
@@ -157,16 +142,14 @@ export class GitHubFetcher {
         }
       }
 
-      if (this.spinner)
-        this.spinner.succeed("Repository content processed successfully!");
+      if (this.spinner) this.spinner.succeed('Repository content processed successfully!');
       if (!this.silent) {
         this.printProcessingSummary();
       }
 
       return content;
     } catch (error) {
-      if (this.spinner)
-        this.spinner.fail("Failed to process repository content");
+      if (this.spinner) this.spinner.fail('Failed to process repository content');
       throw error;
     }
   }
@@ -176,27 +159,16 @@ export class GitHubFetcher {
   }
 
   private formatFileContent(path: string, content: string): string {
-    return formatFileContent(
-      path,
-      content,
-      this.config.output.include_line_numbers,
-    );
+    return formatFileContent(path, content, this.config.output.include_line_numbers);
   }
 
   private printProcessingSummary() {
-    const categories = [
-      "readme",
-      "documentation",
-      "examples",
-      "tests",
-    ] as const;
+    const categories = ['readme', 'documentation', 'examples', 'tests'] as const;
 
-    console.log("\n" + chalk.bold("Processing Summary:"));
+    console.log('\n' + chalk.bold('Processing Summary:'));
 
     categories.forEach((category) => {
-      const filesInCategory = this.processedFiles.filter(
-        (f) => f.category === category,
-      );
+      const filesInCategory = this.processedFiles.filter((f) => f.category === category);
       if (filesInCategory.length > 0) {
         console.log(`\n${chalk.cyan(category.toUpperCase())}`);
         filesInCategory.forEach((file) => {

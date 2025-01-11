@@ -9,7 +9,7 @@ export interface Config {
   max_file_size: number;
   max_files_per_category: number;
   output: {
-    format: "markdown" | "json";
+    format: 'markdown' | 'json';
     file_name: string;
     include_line_numbers: boolean;
     group_by_category: boolean;

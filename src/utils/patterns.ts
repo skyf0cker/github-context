@@ -1,4 +1,4 @@
-import { minimatch } from "minimatch";
+import { minimatch } from 'minimatch';
 
 export function matchesPatterns(path: string, patterns: string[]): boolean {
   return patterns.some((pattern) => minimatch(path, pattern, { dot: true }));
