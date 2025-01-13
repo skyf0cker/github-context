@@ -75,7 +75,7 @@ export function initializeCLI(): Command {
   program
     .name('github-context')
     .description('CLI tool to fetch and analyze GitHub repository content')
-    .version('1.0.0');
+    .version('0.0.4');
 
   program
     .command('fetch')
