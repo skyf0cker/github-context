@@ -6,7 +6,9 @@ import { GitHubFetcher } from '../services/GithubFetcher';
 import { formatOutput } from '../utils/formatters';
 import { encode } from 'gpt-tokenizer';
 import path from 'path';
-import Bun from 'bun';
+import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 interface FetchCommandOptions {
   config?: string;
@@ -24,7 +26,10 @@ export async function fetchCommand(repoUrl: string, options: FetchCommandOptions
 
   try {
     // Load configuration
-    const configPath = options.config || path.join(__dirname, '../config/defaultConfig.yaml');
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    const configPath = options.config || path.join(__dirname, 'config/defaultConfig.yaml');
+
     if (spinner) spinner.text = 'Loading configuration...';
     const config = await loadConfig(configPath);
 
@@ -46,7 +51,7 @@ export async function fetchCommand(repoUrl: string, options: FetchCommandOptions
 
     // Save to file
     if (spinner) spinner.text = 'Saving output...';
-    await Bun.write(config.output.file_name, output);
+    await fs.writeFile(config.output.file_name, output, 'utf-8');
 
     if (spinner) spinner.stop();
 
@@ -75,7 +80,7 @@ export function initializeCLI(): Command {
   program
     .name('github-context')
     .description('CLI tool to fetch and analyze GitHub repository content')
-    .version('0.0.4');
+    .version('0.0.5');
 
   program
     .command('fetch')
@@ -90,11 +95,11 @@ export function initializeCLI(): Command {
     .command('init-config')
     .description('Create a default configuration file in the current directory')
     .action(async () => {
-      const defaultConfig = await Bun.file(
-        path.join(__dirname, '../config/defaultConfig.yaml')
-      ).text();
-
-      await Bun.write('repo-fetch-config.yaml', defaultConfig);
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      const defaultConfigPath = path.join(__dirname, '../config/defaultConfig.yaml');
+      const defaultConfig = await fs.readFile(defaultConfigPath, 'utf-8');
+      await fs.writeFile('repo-fetch-config.yaml', defaultConfig, 'utf-8');
       console.log(chalk.green('✓ Configuration file created: repo-fetch-config.yaml'));
     });
 

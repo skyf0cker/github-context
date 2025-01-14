@@ -1,6 +1,8 @@
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
+import { dirname, join } from 'path';
 
 export default {
   input: 'src/bin/cli.ts',
@@ -31,5 +33,20 @@ export default {
       tsconfig: './tsconfig.json',
       noEmit: false, // Ensure noEmit is false for Rollup
     }),
+    {
+      name: 'copy-config',
+      writeBundle() {
+        // 确保目标目录存在
+        const configDir = join('dist', 'config');
+        if (!existsSync(configDir)) {
+          mkdirSync(configDir, { recursive: true });
+        }
+        // 复制配置文件
+        copyFileSync(
+          join('src', 'config', 'defaultConfig.yaml'),
+          join('dist', 'config', 'defaultConfig.yaml')
+        );
+      },
+    },
   ],
 };
